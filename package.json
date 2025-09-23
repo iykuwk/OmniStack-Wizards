@@ -1,0 +1,24 @@
+{
+  "name": "omnistack-wizards",
+  "version": "1.0.0",
+  "description": "Blockchain-Based Blue Carbon Registry and MRV System",
+  "main": "contentpage.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iykuwk/OmniStack-Wizards.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/iykuwk/OmniStack-Wizards/issues"
+  },
+  "homepage": "https://github.com/iykuwk/OmniStack-Wizards#readme",
+  "dependencies": {
+    "@metamask/onboarding": "^1.0.1"
+  }
+}
