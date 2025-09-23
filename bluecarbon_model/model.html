@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Content Analyzer</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- TensorFlow.js and Teachable Machine Image Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <style>
+        /* Custom styles for a better file input button and animations */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loader {
+            border-top-color: #dadfe3;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+/* Footer Note */
+.footer-note {
+  text-align: center;
+  padding: 10px;
+  background: #2a2a72;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #f5f7f8;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 50px; /* Set your footer height */
+}
+
+</style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 transition-all">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Carbon Content Analyzer</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Upload an image to classify its carbon content level.</p>
+        </header>
+        
+        
+        <main>
+            <!-- Image Upload and Preview Area -->
+            <div id="image-upload-area" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+                <input type="file" id="image-upload-input" class="hidden" accept="image/*">
+                <label for="image-upload-input" class="cursor-pointer">
+                    <div id="upload-prompt">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-semibold text-blue-600 dark:text-blue-400">Click to upload</span> or drag and drop
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-500">PNG, JPG, JPEG up to 10MB</p>
+                    </div>
+                    <div id="image-preview-container" class="hidden">
+                        <img id="image-preview" src="#" alt="Image preview" class="max-h-64 mx-auto rounded-lg shadow-md"/>
+                    </div>
+                </label>
+            </div>
+            
+            <!-- Action Button -->
+            <div class="mt-6 text-center">
+                <button id="predict-button" type="button" class="w-full sm:w-auto bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-all duration-300">
+                    Find Carbon Content
+                </button>
+            </div>
+            <button id="predict-button" type="button" class="w-full sm:w-auto bg-blue-600 text-white font-semibold py-3 px-2 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-all duration-300" onclick="window.location.href='../contentpage.html'">
+                    Home
+                </button>
+            <!-- Status and Results Area -->
+            <div id="status-container" class="text-center mt-6 h-8"></div>
+            <div id="label-container" class="mt-4 space-y-3"></div>
+        </main>
+    </div>
+    <footer class="footer-note">
+      <div class="logo">Copyrights Reserved @Omnistack_Wizards</div>
+    </footer>
+
+    <script type="text/javascript">
+        // The link to your model provided by Teachable Machine export panel
+        const URL = "./my_model/";
+
+        let model, maxPredictions;
+
+        // DOM Elements
+        const uploadArea = document.getElementById('image-upload-area');
+        const uploadInput = document.getElementById('image-upload-input');
+        const uploadPrompt = document.getElementById('upload-prompt');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const predictButton = document.getElementById('predict-button');
+        const statusContainer = document.getElementById('status-container');
+        const labelContainer = document.getElementById('label-container');
+
+        // Main initialization function
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            statusContainer.innerHTML = '<div class="flex items-center justify-center"><div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 mr-3"></div><p>Loading model...</p></div>';
+            predictButton.disabled = true;
+
+            try {
+                // Load the model and metadata
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+                statusContainer.innerHTML = '<p class="text-green-600 dark:text-green-400">Model loaded. Please upload an image.</p>';
+                predictButton.disabled = true; // Keep disabled until image is uploaded
+            } catch (error) {
+                console.error("Error loading model:", error);
+                statusContainer.innerHTML = '<p class="text-red-600 dark:text-red-400">Failed to load model. Please try again.</p>';
+            }
+        }
+        
+        // Handle image selection and display
+        uploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    uploadPrompt.classList.add('hidden');
+                    imagePreviewContainer.classList.remove('hidden');
+                    predictButton.disabled = false;
+                    labelContainer.innerHTML = ''; // Clear previous results
+                    statusContainer.innerHTML = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-blue-500', 'dark:border-blue-400');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+             uploadArea.classList.remove('border-blue-500', 'dark:border-blue-400');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-blue-500', 'dark:border-blue-400');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                 // Manually trigger the change event logic
+                 const dataTransfer = new DataTransfer();
+                 dataTransfer.items.add(file);
+                 uploadInput.files = dataTransfer.files;
+                 uploadInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+
+        // Handle prediction when the button is clicked
+        predictButton.addEventListener('click', async () => {
+            if (!model || !imagePreview.src || imagePreview.src.endsWith('#')) {
+                statusContainer.innerHTML = '<p class="text-red-600 dark:text-red-400">Please upload an image first.</p>';
+                return;
+            }
+
+            statusContainer.innerHTML = '<div class="flex items-center justify-center"><div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 mr-3"></div><p>Analyzing image...</p></div>';
+            predictButton.disabled = true;
+
+            try {
+                // Predict using the loaded image element
+                const prediction = await model.predict(imagePreview);
+                displayPredictions(prediction);
+            } catch (error) {
+                console.error("Prediction error:", error);
+                statusContainer.innerHTML = '<p class="text-red-600 dark:text-red-400">An error occurred during analysis.</p>';
+            } finally {
+                statusContainer.innerHTML = '';
+                predictButton.disabled = false;
+            }
+        });
+        
+        function displayPredictions(prediction) {
+            labelContainer.innerHTML = ''; // Clear previous results
+            
+            // Sort predictions to find the one with the highest probability
+            prediction.sort((a, b) => b.probability - a.probability);
+            
+            // Get the single best prediction
+            const bestPrediction = prediction[0];
+            const probability = (bestPrediction.probability * 100).toFixed(2);
+            
+            // Create a more prominent display for the single result
+            const resultWrapper = document.createElement('div');
+            resultWrapper.className = 'bg-blue-50 dark:bg-gray-700 rounded-xl p-6 text-center border border-blue-200 dark:border-gray-600';
+            
+            const resultLabel = document.createElement('p');
+            resultLabel.className = 'text-lg font-medium text-gray-600 dark:text-gray-400';
+            resultLabel.textContent = 'Highest Predicted Class';
+            
+            const resultClass = document.createElement('p');
+            resultClass.className = 'text-4xl font-bold text-blue-600 dark:text-blue-400 my-2';
+            resultClass.textContent = bestPrediction.className;
+            
+            const resultProbability = document.createElement('p');
+            resultProbability.className = 'text-xl font-medium text-gray-800 dark:text-gray-200';
+            resultProbability.textContent = `Confidence: ${probability}%`;
+
+            const progressBarContainer = document.createElement('div');
+            progressBarContainer.className = 'w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 mt-4';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'bg-blue-600 h-4 rounded-full transition-all duration-500';
+            // Use requestAnimationFrame to trigger the CSS transition after the element is in the DOM
+            requestAnimationFrame(() => {
+                progressBar.style.width = `${probability}%`;
+            });
+            
+            progressBarContainer.appendChild(progressBar);
+            
+            resultWrapper.appendChild(resultLabel);
+            resultWrapper.appendChild(resultClass);
+            resultWrapper.appendChild(resultProbability);
+            resultWrapper.appendChild(progressBarContainer);
+            
+            labelContainer.appendChild(resultWrapper);
+        }
+
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
