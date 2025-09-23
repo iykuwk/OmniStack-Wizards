@@ -63,7 +63,7 @@
         <div class="d-flex align-items-center">
             <div class="me-3">More</div>
             <div class="user-info">
-                <span class="status connected">Connected</span>
+                <span id="walletStatus" class="status disconnected">Disconnected</span>
                 <span>👤 Admin User ▼</span>
             </div>
         </div>
@@ -355,9 +355,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5>Wallet Connection</h5>
-                        <p class="text-warning">Wallet Connection Required</p>
+                        <p id="walletMessage" class="text-warning">Wallet Connection Required</p>
                         <p>Connect your Web3 wallet to access blockchain features</p>
-                            <input type="button" value="Connect Wallet" onclick="web3metamask()">
+                            <input id="connectBtn" type="button" value="Connect Wallet" onclick="web3metamask()">
                         <div class="mt-3">
                             <img src="https://imgs.search.brave.com/otKqxUJnyWSbvNBp5yx2G_4DT0M_30e65sAixx4RMTU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/aWNvbnNjb3V0LmNv/bS9pY29uL2ZyZWUv/cG5nLTI1Ni9mcmVl/LW1ldGFtYXNrLWxv/Z28taWNvbi1zdmct/ZG93bmxvYWQtcG5n/LTIyNjE4MTcucG5n/P2Y9d2VicCZ3PTI1/Ng" alt="MetaMask" class="img-fluid">
                         </div>
@@ -422,7 +422,7 @@
             // Logic to update progress bar
             document.querySelector('.progress-bar').style.width = '25%';
         });
-        
+
         //linking metamask
         function web3metamask(){
         ethereum.request({
@@ -430,6 +430,31 @@
         }).then(result=>{
            console.log(result);
         });   
+        document.getElementById("connectBtn").addEventListener("click", web3metamask);
+
+function web3metamask(){
+    if (typeof window.ethereum === "undefined") {
+        alert("MetaMask not detected. Please install it.");
+        return;
+    }
+
+    ethereum.request({ method:'eth_requestAccounts' })
+    .then(accounts => {
+        console.log(accounts);
+
+        document.getElementById("walletStatus").textContent = "Connected";
+        document.getElementById("walletStatus").className = "status connected";
+        document.getElementById("walletMessage").textContent = "Wallet Connected: " + accounts[0];
+        document.getElementById("walletMessage").className = "text-success";
+
+        // optional: disable button after connect
+        document.getElementById("connectBtn").disabled = true;
+        document.getElementById("connectBtn").value = "✅ Connected";
+    })
+    .catch(err => {
+        console.error("User rejected request:", err);
+    });
+}
      }
     </script>
 </body>
