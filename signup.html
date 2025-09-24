@@ -1,26 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blue Carbon Registry - Login</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Carbon Registry - Register</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="login-bg">
-  <div class="container">
-    <div class="card">
-      <h1>🌊 Blue Carbon Registry</h1>
-      <p class="subtitle">Blockchain MRV System</p>
-      <p class="subtitle">Create a <b>Metamask Account</b> before Registering.</p>
-      <form onsubmit="return loginUser(event)">
-        <input type="text" id="FullName" placeholder="Enter Your FullName" required>
-        <input type="text" id="Email" placeholder="Enter Your E-mail" required>
-        <input type="password" id="password" placeholder="Enter Password" required>
-        <input type="password" id="confirmpassword" placeholder="Enter Confirm Password" required>
-         <button onclick="window.location.href='contentpage.html'">Register</button>
-      </form>
+<body class="login-bg float-animation">
+    <div class="container">
+        <div class="card glassmorphism">
+            <h1>🌊 Blue Carbon Registry</h1>
+            <p class="subtitle">Blockchain MRV System</p>
+            <p class="subtitle">Create a <b>Metamask Account</b> before Registering.</p>
+            <form onsubmit="validateFormAndRedirect(event, 'signup')">
+                <div class="input-group">
+                    <input type="text" id="FullName" placeholder="Full Name" required>
+                    <label for="FullName">Full Name</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="Email" placeholder="E-mail" required>
+                    <label for="Email">E-mail</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <label for="password">Password</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirmpassword" placeholder="Confirm Password" required>
+                    <label for="confirmpassword">Confirm Password</label>
+                </div>
+                <button type="submit" class="cta-button">Register</button>
+            </form>
+            <p class="small-text">Already have an account? <a href="index.html">Login here</a></p>
+        </div>
     </div>
-  </div>
-  <script src="login.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>

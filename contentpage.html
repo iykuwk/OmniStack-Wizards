@@ -4,40 +4,278 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlueCarbon Registry - Blockchain-Based Blue Carbon Registry and MRV System</title>
-    <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="result.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
-        .sidebar { background-color: #fff; border-right: 1px solid #dee2e6; height: 100vh; position: fixed; width: 250px; }
-        .sidebar ul { list-style: none; padding: 0; }
-        .sidebar li { padding: 10px 20px; cursor: pointer; }
-        .sidebar li:hover, .sidebar li.active { background-color: #e3f2fd; }
-        .main-content { margin-left: 250px; padding: 20px; }
-        .top-bar { background-color: #fff; border-bottom: 1px solid #dee2e6; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: bold; color: #007bff; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .status { padding: 4px 8px; border-radius: 20px; font-size: 0.8em; }
-        .status.connected { background-color: #d4edda; color: #155724; }
-        .status.disconnected { background-color: #f8d7da; color: #721c24; }
-        .card { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-        .metric-card { text-align: center; padding: 20px; }
-        .metric-value { font-size: 2rem; font-weight: bold; }
-        .metric-label { color: #6c757d; }
-        .chart-container { height: 300px; }
-        .project-table { margin-top: 20px; }
-        .form-section { margin-bottom: 30px; }
-        .nav-tabs .nav-link.active { background-color: #007bff; color: white; }
-        .img-fluid {max-width: 50px; height: auto; display: block;}
-        a{color: #021406; text-decoration: none;}
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --primary-blue: #0077b6;
+            --secondary-blue: #00b4d8;
+            --dark-blue: #023e8a;
+            --background-light: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-dark: #222;
+            --text-muted: #6c757d;
+            --green-success: #28a745;
+            --warning-alert: #ffc107;
+            --box-shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-color: #e9ecef;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .sidebar {
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding-top: 2rem;
+            box-shadow: var(--box-shadow-subtle);
+            transition: all 0.3s ease-in-out;
+            margin-top: 70px; /* Added to push the sidebar down */
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 5px 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .sidebar li:hover {
+            background-color: var(--background-light);
+        }
+
+        .sidebar li .nav-link {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .sidebar li.active {
+            background-color: var(--primary-blue);
+        }
+
+        .sidebar li.active .nav-link {
+            color: var(--card-bg);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .top-bar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status.connected {
+            background-color: var(--green-success);
+            color: #fff;
+        }
+
+        .status.disconnected {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .card {
+            box-shadow: var(--box-shadow-subtle);
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            height: 350px;
+        }
+
+        .form-section .card {
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .form-section .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 119, 182, 0.25);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .project-table .card-body {
+            padding: 0;
+        }
+        
+        .project-table .row {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        
+        .project-table .row:last-child {
+            border-bottom: none;
+        }
+        
+        .project-table .row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .img-fluid {
+            max-width: 50px;
+            height: auto;
+            display: block;
+        }
+        
+        .alert-info {
+            background-color: rgba(0, 119, 182, 0.1);
+            color: var(--dark-blue);
+            border-color: rgba(0, 119, 182, 0.2);
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #856404;
+            border-color: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid var(--warning-alert);
+        }
+
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        
+        .glassmorphism-card .card-body {
+            color: white;
+        }
+        
+        .badge.bg-success { background-color: #28a745 !important; padding: 20px; }
+        .badge.bg-primary { background-color: #007bff !important; padding: 20px;}
+        .badge.bg-warning { background-color: #ffc107 !important; padding: 20px;}
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
+                padding-top: 0;
+            }
+            .sidebar li {
+                margin: 0;
+                border-radius: 0;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            .top-bar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+                position: relative;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <nav class="sidebar">
         <ul class="nav flex-column">
             <li class="nav-item">
@@ -60,61 +298,68 @@
             </li>
         </ul>
     </nav>
-    <!-- Top Bar -->
     <header class="top-bar">
-        <div class="logo">BlueCarbon Registry</div>
-        <div class="d-flex align-items-center">
-            <div class="me-3">More</div>
-            <div class="user-info">
-                <span id="walletStatus" class="status disconnected">Disconnected</span>
-                <span class="username">👤 Admin User </span>
-            </div>
-        </div>
-    </header>
+    <div class="logo">BlueCarbon Registry</div>
+    <div class="d-flex align-items-center">
+        <button id="logoutBtn" class="btn btn-outline-danger me-3">Logout</button>
+        <div class="user-info">
+    <span id="walletStatus" class="status disconnected">Disconnected</span>
+    <span class="username">👤 Admin User </span> </div>
 
-    <!-- Main Content -->
+<script>
+    // Get the username from local storage
+    const storedUsername = localStorage.getItem('loggedInUsername');
+
+    // If a username is found, update the display
+    if (storedUsername) {
+        const usernameSpan = document.querySelector('.username');
+        usernameSpan.textContent = `👤 ${storedUsername}`;
+    }
+</script>
+    </div>
+</header>
+
     <main class="main-content">
         <div class="tab-content">
-            <!-- Dashboard Tab -->
             <div class="tab-pane fade show active" id="dashboard">
                 <h2>Dashboard</h2>
-                <p>Welcome back! Here's an overview of your blue carbon projects and activities.</p>
-                <div class="row mb-4">
+                <p class="text-muted">Welcome back! Here's an overview of your blue carbon projects and activities.</p>
+                <div class="row g-4 mb-4">
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">47</div>
                             <div class="metric-label">Total Projects</div>
-                            <div class="text-success">+12% from last month</div>
+                            <div class="text-success small-text">+12% from last month</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">125,420 tCO₂</div>
                             <div class="metric-label">Carbon Credits Issued</div>
-                            <div class="text-success">+8.5% from last month</div>
+                            <div class="text-success small-text">+8.5% from last month</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">8</div>
                             <div class="metric-label">Pending Verifications</div>
-                            <div class="text-warning">-15% from last week</div>
+                            <div class="text-warning small-text">-15% from last week</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">234</div>
                             <div class="metric-label">Blockchain Transactions</div>
-                            <div class="text-success">+23% from last month</div>
+                            <div class="text-success small-text">+23% from last month</div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row g-4">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
-                                <h5>Carbon Sequestration Trends</h5>
-                                <p>Monthly carbon capture by ecosystem type (tCO₂)</p>
+                                <h5 class="card-title">Carbon Sequestration Trends</h5>
+                                <p class="card-text text-muted">Monthly carbon capture by ecosystem type (tCO₂)</p>
                                 <canvas id="sequestrationChart" class="chart-container"></canvas>
                             </div>
                         </div>
@@ -122,15 +367,11 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
-                                <h5>Project Locations</h5>
-                                <p>Global distribution of blue carbon projects</p>
-                                <div class="d-flex align-items-center mb-2">
+                                <h5 class="card-title">Project Locations</h5>
+                                <p class="card-text text-muted">Global distribution of blue carbon projects</p>
+                                <div class="d-flex flex-column gap-2 mb-3">
                                     <span class="badge bg-success">Mangroves</span>
-                                </div>
-                                <div class="d-flex align-items-center mb-2">
                                     <span class="badge bg-primary">Wetlands</span>
-                                </div>
-                                <div class="d-flex align-items-center mb-2">
                                     <span class="badge bg-warning">Seagrass</span>
                                 </div>
                                 <ul class="list-unstyled">
@@ -143,11 +384,10 @@
                 </div>
             </div>
 
-            <!-- Register Project Tab -->
             <div class="tab-pane fade" id="register-project">
                 <h2>Project Registration</h2>
-                <p>Register your blue carbon project for verification and tokenization</p>
-                <div class="progress mb-3">
+                <p class="text-muted">Register your blue carbon project for verification and tokenization</p>
+                <div class="progress mb-4" style="height: 5px;">
                     <div class="progress-bar" style="width: 0%"></div>
                 </div>
                 <form>
@@ -155,22 +395,21 @@
                         <div class="card-header">1. Basic Information</div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="form-label">Project Name *</label>
-                                <input type="text" class="form-control" placeholder="Enter your blue carbon project name">
+                                <label class="form-label">Project Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Enter your blue carbon project name" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Project Description *</label>
-                                <textarea class="form-control" rows="4" placeholder="Provide a detailed description of your blue carbon project, including objectives, expected outcomes, environmental benefits..."></textarea>
+                                <label class="form-label">Project Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" rows="4" placeholder="Provide a detailed description of your blue carbon project..." required></textarea>
                             </div>
                         </div>
                     </div>
-                    <!-- Add more sections: Location Details, Technical Specifications, Documentation Upload -->
                     <div class="card form-section">
                         <div class="card-header">2. Location Details</div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="form-label">Location *</label>
-                                <input type="text" class="form-control" placeholder="e.g., Florida Keys, USA">
+                                <label class="form-label">Location <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="e.g., Florida Keys, USA" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Ecosystem Type</label>
@@ -189,7 +428,6 @@
                                 <label class="form-label">Expected Carbon Capture (tCO₂/year in %)</label>
                                 <input type="number" class="form-control">
                             </div>
-                            <!-- More fields -->
                         </div>
                     </div>
                     <div class="card form-section">
@@ -201,121 +439,120 @@
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-3">
                         <button type="button" class="btn btn-outline-secondary">💾 Save Draft</button>
-                        <button type="submit" class="btn btn-primary"><a href="./bluecarbon_model/model.html">📤 Verify With Model</a></button>
+                        <button type="submit" class="btn btn-primary">
+                            <a href="./bluecarbon_model/model.html" style="color:white; text-decoration:none;">📤 Verify With Model</a>
+                        </button>
                     </div>
                 </form>
-                <div class="alert alert-warning mt-3">
+                <div class="alert alert-warning mt-4">
                     Form Incomplete: 16 required fields remaining. You can save as draft and complete later, or fill all fields to submit for review.
                 </div>
             </div>
 
-            <!-- Projects Tab -->
             <div class="tab-pane fade" id="projects">
                 <h2>Project Management</h2>
-                <p>Manage and monitor your blue carbon projects with comprehensive tracking and verification tools</p>
-                <div class="d-flex justify-content-between mb-3">
+                <p class="text-muted">Manage and monitor your blue carbon projects with comprehensive tracking and verification tools</p>
+                <div class="d-flex flex-wrap justify-content-between mb-4 gap-2">
                     <input type="text" class="form-control w-25" placeholder="Search projects...">
-                    <div>
-                        <select class="form-select d-inline w-auto me-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <select class="form-select w-auto">
                             <option>Ecosystem</option>
                             <option>Mangroves</option>
                         </select>
-                        <select class="form-select d-inline w-auto me-2">
+                        <select class="form-select w-auto">
                             <option>Status</option>
                             <option>Verified</option>
                         </select>
-                        <button class="btn btn-outline-primary me-2">Export Data</button>
+                        <button class="btn btn-outline-primary">Export Data</button>
                         <button id="addNewPBtn" class="btn btn-primary">+ Add New Project</button>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card project-table">
                     <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-3"><strong>Project Name</strong></div>
-                            <div class="col-md-3"><strong>Ecosystem</strong></div>
-                            <div class="col-md-3"><strong>Location</strong></div>
-                            <div class="col-md-3"><strong>Status</strong></div>
+                        <div class="row fw-bold border-bottom p-3">
+                            <div class="col-md-3">Project Name</div>
+                            <div class="col-md-3">Ecosystem</div>
+                            <div class="col-md-3">Location</div>
+                            <div class="col-md-3">Status</div>
                         </div>
-                        <div class="project-row mb-2">
+                        <div class="project-row row">
                             <div class="col-md-3">Mangrove Restoration Project</div>
                             <div class="col-md-3">Mangroves</div>
                             <div class="col-md-3">Florida Keys, USA</div>
                             <div class="col-md-3"><span class="badge bg-success">Verified</span></div>
                         </div>
-                        <!-- Add more rows -->
                     </div>
                 </div>
-                <div class="row mt-3">
+                <div class="row g-4 mt-3">
                     <div class="col-md-3">
-                        <div class="card text-center">
+                        <div class="card metric-card">
                             <div class="card-body">
-                                <i class="folder-icon"></i> Total Projects: 8 <span class="text-success">+12%</span>
+                                <h5>Total Projects: 8</h5> 
+                                <span class="text-success">+12%</span>
                             </div>
                         </div>
                     </div>
-                    <!-- More metrics -->
                 </div>
             </div>
 
-            <!-- MRV Tab -->
             <div class="tab-pane fade" id="mrv">
                 <h2>MRV Dashboard</h2>
-                <p>Monitor, report, and verify blue carbon project data with real-time insights</p>
-                <div class="d-flex justify-content-between mb-3">
-                    <h5></h5>
-                    <div>
-                        <button class="btn btn-outline-primary me-2">📥 Export Data</button>
+                <p class="text-muted">Monitor, report, and verify blue carbon project data with real-time insights</p>
+                <div class="d-flex flex-wrap justify-content-between mb-4 gap-2">
+                    <h5 class="my-auto">Real-time Data</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary">📥 Export Data</button>
                         <button class="btn btn-primary">🔄 Refresh</button>
                     </div>
                 </div>
-                <div class="row mb-4">
+                <div class="row g-4 mb-4">
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">2,847 tCO₂</div>
                             <div class="metric-label">Total Carbon Sequestered</div>
-                            <div class="text-success">+12.5% vs last month</div>
+                            <div class="text-success small-text">+12.5% vs last month</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">156</div>
                             <div class="metric-label">Sensors</div>
-                            <div class="text-success">+8% vs last month</div>
+                            <div class="text-success small-text">+8% vs last month</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">78%</div>
                             <div class="metric-label">Verification Progress</div>
-                            <div class="text-success">+5.2% vs last month</div>
+                            <div class="text-success small-text">+5.2% vs last month</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card metric-card">
                             <div class="metric-value">94.2/100</div>
                             <div class="metric-label">Data Quality Score</div>
-                            <div class="text-danger">-1.1% vs last month</div>
+                            <div class="text-danger small-text">-1.1% vs last month</div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row g-4">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
-                                <h5>Carbon Sequestration Trends</h5>
-                                <div class="mb-2">
-                                    <label>Period: </label>
-                                    <select class="form-select d-inline w-auto">
+                                <h5 class="card-title">Carbon Sequestration Trends</h5>
+                                <div class="mb-3 d-flex flex-wrap gap-2">
+                                    <label>Period:</label>
+                                    <select class="form-select w-auto">
                                         <option>1M</option>
                                         <option selected>3M</option>
                                         <option>6M</option>
                                         <option>1Y</option>
                                         <option>All</option>
                                     </select>
-                                    <label class="ms-3">Ecosystem: </label>
-                                    <select class="form-select d-inline w-auto">
+                                    <label class="ms-3">Ecosystem:</label>
+                                    <select class="form-select w-auto">
                                         <option>All Ecosystems</option>
                                     </select>
                                 </div>
@@ -326,15 +563,15 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
-                                <h5>Data Upload</h5>
-                                <p>Upload monitoring data files (CSV, JSON, XLSX) up to 10MB</p>
-                                <div class="border p-3 text-center" style="min-height: 100px;">
-                                    <p>Drop files here or click</p>
-                                    <button class="btn btn-outline-primary">📁 Choose Files</button>
+                                <h5 class="card-title">Data Upload</h5>
+                                <p class="card-text text-muted">Upload monitoring data files (CSV, JSON, XLSX) up to 10MB</p>
+                                <div class="border p-4 text-center rounded" style="border-style: dashed !important; min-height: 150px;">
+                                    <p class="text-muted">Drag & drop files here or click</p>
+                                    <button class="btn btn-outline-primary mt-2">📁 Choose Files</button>
                                 </div>
-                                <h6 class="mt-3">Recent Uploads</h6>
+                                <h6 class="mt-4">Recent Uploads</h6>
                                 <ul class="list-unstyled">
-                                    <li class="small">monitoring_data.csv - Uploaded 2 days ago</li>
+                                    <li class="small text-muted">monitoring_data.csv - Uploaded 2 days ago</li>
                                 </ul>
                             </div>
                         </div>
@@ -342,30 +579,27 @@
                 </div>
             </div>
 
-            <!-- Verification Tab -->
             <div class="tab-pane fade" id="verification">
                 <h2>Verification</h2>
-                <p>Review and verify pending project submissions</p>
-                <!-- Add content similar to projects but focused on verification -->
-                <div class="alert alert-info">8 pending verifications. Review and approve to issue carbon credits.</div>
-            </div>
+                <p class="text-muted">Review and verify pending project submissions</p>
+                <div class="alert alert-info mt-3">8 pending verifications. Review and approve to issue carbon credits.</div>
+                </div>
 
-            <!-- Infrastructure Tab -->
             <div class="tab-pane fade" id="infrastructure">
                 <h2>Infrastructure</h2>
-                <p>Manage Web3 connectivity, smart contracts, and tokenization processes</p>
+                <p class="text-muted">Manage Web3 connectivity, smart contracts, and tokenization processes</p>
                 <div class="card">
                     <div class="card-body">
-                        <h5>Wallet Connection</h5>
-                        <p id="walletMessage" class="text-warning">Wallet Connection Required</p>
-                        <p>Connect your Web3 wallet to access blockchain features</p>
-                            <input id="connectBtn" type="button" value="Connect Wallet" onclick="web3metamask()">
+                        <h5 class="card-title">Wallet Connection</h5>
+                        <p id="walletMessage" class="text-danger fw-bold">Wallet Connection Required</p>
+                        <p class="text-muted">Connect your Web3 wallet to access blockchain features</p>
+                        <input id="connectBtn" type="button" class="btn btn-primary" value="Connect Wallet" onclick="web3metamask()">
                         <div class="mt-3">
                             <img src="https://imgs.search.brave.com/otKqxUJnyWSbvNBp5yx2G_4DT0M_30e65sAixx4RMTU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/aWNvbnNjb3V0LmNv/bS9pY29uL2ZyZWUv/cG5nLTI1Ni9mcmVl/LW1ldGFtYXNrLWxv/Z28taWNvbi1zdmct/ZG93bmxvYWQtcG5n/LTIyNjE4MTcucG5n/P2Y9d2VicCZ3PTI1/Ng" alt="MetaMask" class="img-fluid">
                         </div>
                     </div>
                 </div>
-                <div class="row mt-4">
+                <div class="row g-4 mt-4">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">Overview</div>
@@ -383,10 +617,9 @@
         </div>
     </main>
 
-    <!-- Bootstrap JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-     // Tab switching
+        // Tab switching
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', e => {
                 e.preventDefault();
@@ -397,12 +630,11 @@
                 document.querySelector(target).classList.add('show', 'active');
             });
         });
-    alert("Please fill in all fields.");
+        
         // Handle "Add New Project" button click
-    document.getElementById("addNewPBtn").addEventListener("click",     function () {
-        // Simulate click on "+ Register Project" tab
-        document.getElementById("registerPTab").click();
-    });
+        document.getElementById("addNewPBtn").addEventListener("click", function () {
+            document.getElementById("registerPTab").click();
+        });
 
         // Charts
         const sequestrationCtx = document.getElementById('sequestrationChart').getContext('2d');
@@ -410,9 +642,24 @@
             type: 'line',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{ label: 'tCO₂', data: [3000, 3500, 4000, 4500, 5000, 6000], borderColor: 'purple' }]
+                datasets: [{ 
+                    label: 'tCO₂', 
+                    data: [3000, 3500, 4000, 4500, 5000, 6000], 
+                    borderColor: 'rgb(0, 119, 182)',
+                    backgroundColor: 'rgba(0, 119, 182, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-            options: { responsive: true }
+            options: { 
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
         });
 
         const mrvCtx = document.getElementById('mrvChart').getContext('2d');
@@ -420,50 +667,67 @@
             type: 'line',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{ label: 'Carbon Capture', data: [500, 550, 600, 650, 700, 800], borderColor: 'blue' }]
+                datasets: [{ 
+                    label: 'Carbon Capture', 
+                    data: [500, 550, 600, 650, 700, 800], 
+                    borderColor: 'rgb(0, 180, 216)',
+                    backgroundColor: 'rgba(0, 180, 216, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
             },
-            options: { responsive: true }
+            options: { 
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
         });
 
         // Form progress (simplified)
         document.querySelector('form').addEventListener('input', () => {
-            // Logic to update progress bar
-            document.querySelector('.progress-bar').style.width = '25%';
+            const formInputs = document.querySelectorAll('#register-project .form-section input, #register-project .form-section textarea, #register-project .form-section select');
+            let filledCount = 0;
+            formInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    filledCount++;
+                }
+            });
+            const progress = (filledCount / formInputs.length) * 100;
+            document.querySelector('.progress-bar').style.width = progress + '%';
         });
 
-        //linking metamask
-        function web3metamask(){
-        ethereum.request({
-        method:'eth_requestAccounts'
-        }).then(result=>{
-           console.log(result);
-        });   
-        document.getElementById("connectBtn").addEventListener("click", web3metamask);
+        // Metamask linking function
+        function web3metamask() {
+            if (typeof window.ethereum === "undefined") {
+                alert("MetaMask not detected. Please install it.");
+                return;
+            }
 
-        function web3metamask(){
-        if (typeof window.ethereum === "undefined") {
-        alert("MetaMask not detected. Please install it.");
-        return;
+            ethereum.request({ method: 'eth_requestAccounts' })
+                .then(accounts => {
+                    console.log(accounts);
+                    document.getElementById("walletStatus").textContent = "Connected";
+                    document.getElementById("walletStatus").className = "status connected";
+                    document.getElementById("walletMessage").textContent = "Wallet Connected: " + accounts[0];
+                    document.getElementById("walletMessage").className = "text-success fw-bold";
+                    document.getElementById("connectBtn").disabled = true;
+                    document.getElementById("connectBtn").value = "✅ Connected";
+                })
+                .catch(err => {
+                    console.error("User rejected request:", err);
+                    document.getElementById("walletMessage").textContent = "Wallet Connection Failed.";
+                    document.getElementById("walletMessage").className = "text-danger fw-bold";
+                });
         }
-
-        ethereum.request({ method:'eth_requestAccounts' })
-        .then(accounts => {
-        console.log(accounts);
-
-        document.getElementById("walletStatus").textContent = "Connected";
-        document.getElementById("walletStatus").className = "status connected";
-        document.getElementById("walletMessage").textContent = "Wallet Connected: " + accounts[0];
-        document.getElementById("walletMessage").className = "text-success";
-
-        // optional: disable button after connect
-        document.getElementById("connectBtn").disabled = true;
-        document.getElementById("connectBtn").value = "✅ Connected";
-        })
-        .catch(err => {
-        console.error("User rejected request:", err);
-        });
-}
-     }
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+                     // Optionally, you could clear user session data here if you had any
+                    alert('Logging out...');
+                    window.location.href = 'index.html';
+                });
     </script>
 </body>
 </html>
